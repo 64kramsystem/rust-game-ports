@@ -7,8 +7,8 @@ use ggez::{timer, Context, GameResult};
 use crate::ball::Ball;
 use crate::bat::Bat;
 use crate::controls::{
-    is_fire_button_pressed, is_pad_down_pressed, is_pad_up_pressed, p1_controls, p2_controls,
-    PadNum,
+    is_fire_button_pressed, is_pad_down_pressed, is_pad_up_pressed, is_quit_button_pressed,
+    p1_controls, p2_controls, PadNum,
 };
 use crate::game::Game;
 use crate::state::State;
@@ -82,6 +82,10 @@ impl EventHandler for GlobalState {
         // We mimick the source project structure for the pad.
         let fire_pressed = is_fire_button_pressed(context, PadNum::Zero) && !self.fire_down;
         self.fire_down = is_fire_button_pressed(context, PadNum::Zero);
+
+        if is_quit_button_pressed(context, PadNum::Zero) {
+            ggez::event::quit(context);
+        }
 
         match self.state {
             State::Menu => {

@@ -83,7 +83,7 @@ fn main() -> GameResult {
     let mut context_builder = ggez::ContextBuilder::new(GAME_ID, AUTHOR)
         .window_setup(ggez::conf::WindowSetup::default().title(WINDOW_TITLE))
         .window_mode(
-            ggez::conf::WindowMode::default().fullscreen_type(ggez::conf::FullscreenType::Desktop),
+            ggez::conf::WindowMode::default().fullscreen_type(ggez::conf::FullscreenType::True),
         );
 
     for dir in resource_dirs {
