@@ -13,7 +13,7 @@ mod state;
 use std::env;
 use std::path::PathBuf;
 
-use ggez::{event, GameResult};
+use ggez::{event, graphics::Rect, Context, GameError, GameResult};
 
 use global_state::GlobalState;
 
@@ -45,18 +45,55 @@ fn get_resource_dirs() -> Vec<PathBuf> {
         .collect()
 }
 
+fn configure_window_and_viewport(context: &mut Context) -> Result<(), GameError> {
+    let (drawable_width, drawable_height) = ggez::graphics::drawable_size(context);
+
+    let (new_drawable_width, new_drawable_height) =
+        if drawable_width / drawable_height > WINDOW_WIDTH / WINDOW_HEIGHT {
+            (
+                WINDOW_HEIGHT * (drawable_width / drawable_height),
+                WINDOW_HEIGHT,
+            )
+        } else {
+            (
+                WINDOW_WIDTH,
+                WINDOW_WIDTH * (drawable_height / drawable_width),
+            )
+        };
+
+    ggez::graphics::set_drawable_size(context, new_drawable_width, new_drawable_height)?;
+
+    let tot_border_width = new_drawable_width - WINDOW_WIDTH;
+    let tot_border_height = new_drawable_height - WINDOW_HEIGHT;
+
+    ggez::graphics::set_screen_coordinates(
+        context,
+        Rect::new(
+            -tot_border_width / 2.,
+            -tot_border_height / 2.,
+            new_drawable_width,
+            new_drawable_height,
+        ),
+    )
+}
+
 fn main() -> GameResult {
     let resource_dirs = get_resource_dirs();
 
     let mut context_builder = ggez::ContextBuilder::new(GAME_ID, AUTHOR)
         .window_setup(ggez::conf::WindowSetup::default().title(WINDOW_TITLE))
-        .window_mode(ggez::conf::WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT));
+        .window_mode(
+            ggez::conf::WindowMode::default().fullscreen_type(ggez::conf::FullscreenType::Desktop),
+        );
 
     for dir in resource_dirs {
         context_builder = context_builder.add_resource_path(dir);
     }
 
     let (mut context, event_loop) = context_builder.build()?;
+
+    configure_window_and_viewport(&mut context)?;
+
     let mut state = GlobalState::new(&mut context);
 
     state.play_music(&mut context)?;
